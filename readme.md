@@ -1,6 +1,7 @@
-little socket.io to process voice messsages
+little socket.io to process voice messsages (TTS)
 
 $ npm install express
+
 $ npm install socket.io
 
 open to listen
