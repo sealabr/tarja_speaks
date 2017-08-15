@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+  <head>
+    <title>?????</title>
+
+    <style>
+      body {
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-position: center;
+          background-color:black;
+          max-height: 100%;
+          -o-background-size:35% auto;
+          -webkit-background-size:35% auto;
+          -moz-background-size:35% auto;
+          background-size:35% auto;
+      }
+      .no-js #loader { display: none;  }
+      .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+      .se-pre-con {
+          position: fixed;
+          left: 0px;
+          top: 0px;
+          width: 100%;
+          height: 100%;
+          z-index: 9999;
+          background: url('http://smallenvelop.com/wp-content/uploads/2014/08/Preloader_51.gif') center no-repeat #fff;
+      }
+
+    </style>
+  </head>
+  <body onload="startTime()">
+
+    <input type="text" name="time_now" id="time_now">
+    <input type="text" name="time_request" id="time_request">
+
+    <div class="se-pre-con"></div>
+
+    <audio id="myAudio" autoplay preload="auto" autobuffer controls class="audio" style="display: none"></audio>
+    
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
+    <script>
+
+  function compareTime(time1, time2) {
+     var s1 = time1.split(":")[0] * 3600 + time1.split(":")[1] * 60 + time1.split(":")[2];
+     var s2 = time2.split(":")[0] * 3600 + time2.split(":")[1] * 60 + time2.split(":")[2];
+     return Math.abs(s1 - s2); // Gets difference in seconds
+  }
+
+  function startTime() {
+      var today = new Date();
+      var h = today.getHours();
+      var m = today.getMinutes();
+      var s = today.getSeconds();
+      m = checkTime(m);
+      s = checkTime(s);
+      $("#time_now").val(h + ":" + m + ":" + s);
+      var t = setTimeout(startTime, 500);
+  }
+  function checkTime(i) {
+      if (i < 10) {i = "0" + i};
+      return i;
+  }
+
+ function getDateTime() {
+    var now     = new Date(); 
+    var hour    = now.getHours();
+    var minute  = now.getMinutes();
+    var second  = now.getSeconds(); 
+    if(hour.toString().length == 1) {
+        var hour = '0'+hour;
+    }
+    if(minute.toString().length == 1) {
+        var minute = '0'+minute;
+    }
+    if(second.toString().length == 1) {
+        var second = '0'+second;
+    }   
+    var dateTime = hour+':'+minute+':'+second;   
+     return dateTime;
+  }
+
+  function play_audio(msg){
+
+          var voice = 'pt-BR_IsabelaVoice';
+          // en-GB_KateVoice
+          // en-US_LisaVoice
+          // en-US_AllisonVoice
+
+          var audio = document.getElementById("myAudio"); 
+          audio.setAttribute('src','https://text-to-speech-demo.mybluemix.net/api/synthesize?text='+msg+'&voice='+voice+'&ssmlLabel=SSML&download=true');
+          audio.type = "type/ogg"; 
+          audio.play();
+
+          $("#time_request").val( getDateTime() );
+
+  }
+
+
+  // compareTime(time_1, time_2)
+
+    $(window).load(function() {
+      // Animate loader off screen
+      $(".se-pre-con").fadeOut("slow");;
+    });
+
+      $(function () {
+        var socket = io();
+
+        socket.on('chat message', function(msg,delay){
+
+          var compare = compareTime( getDateTime() ,$("#time_request").val());
+
+            if(compare >= delay){
+
+             console.log('ok....' + msg);
+
+            //setTimeout(function(){
+                 play_audio(msg);
+            //}, 500);
+
+            }else{
+
+                var resta = delay-compare;
+                console.log('espere o delay falta ['+resta+'] seg. de total ['+delay+'] seg.' + msg + ' - ' + getDateTime());
+
+            }
+
+        });
+      });
+
+    $(document).ready(function(){
+
+        var myArray = [
+            'frog'
+            ];  
+
+        var keyword = myArray[Math.floor(Math.random() * myArray.length)];
+
+        $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
+        {
+            tags: keyword,
+            tagmode: "any",
+            format: "json"
+        },
+        function(data) {
+            var rnd = Math.floor(Math.random() * data.items.length);
+
+            var image_src = data.items[rnd]['media']['m'].replace("_m", "_b");
+
+            $('body').css('background-image', "url('" + image_src + "')");
+            document.title = keyword;
+
+        });
+
+        $("#time_request").val('00:00:00');
+
+    });
+
+    /*
+
+      Hello! I'm Allison, but you can change my voice however you wish. <voice-transformation type="Custom" glottal_tension="-80%"> For example, you can make my voice a bit softer, </voice-transformation> <voice-transformation type="Custom" glottal_tension="40%" breathiness="40%"> or a bit strained. </voice-transformation><voice-transformation type="Custom" timbre="Breeze" timbre_extent="60%"> You can alter my voice timbre making me sound like this person, </voice-transformation> <voice-transformation type="Custom" timbre="Sunrise"> or like another person in your different applications. </voice-transformation><voice-transformation type="Custom" breathiness="90%"> You can make my voice more breathy than it is normally. </voice-transformation><voice-transformation type="Young" strength="80%"> I can speak like a young girl. </voice-transformation><voice-transformation type="Custom" pitch="-30%" pitch_range="80%" rate="60%" glottal_tension="-80%" timbre="Sunrise"> And you can combine all this with modifications of my speech rate and my tone. </voice-transformation>
+
+    */
+    </script>
+  </body>
+</html>
